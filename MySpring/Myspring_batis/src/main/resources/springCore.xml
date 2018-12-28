@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--1.开启组件扫秒-->
+    <context:component-scan base-package="com.itcast"/>
+    <!--2.引入外部资源配置文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!--3.配置数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--将mybatis交由Spring管理-->
+    <!--4.创建SqlSessionFactory-->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--注入数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--别名的配置-->
+        <property name="typeAliasesPackage" value="com.itcast.domain"/>
+    </bean>
+    <!--5.spring通过Mapper接口的扫描器获取Mapper代理对象-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.itcast.mapper"/>
+        <!--SqlSessionFactory可以配置也可以不配
+        <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+        -->
+    </bean>
+    <!--6.声明事务管理器对象-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--数据源-->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--7.声明事务通知-->
+    <tx:advice id="myAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" read-only="false" propagation="REQUIRED" isolation="DEFAULT"/>
+            <tx:method name="find*" read-only="true" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--8.配置AOP-->
+    <aop:config>
+        <aop:pointcut id="pt1" expression="execution(* com.itcast.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="myAdvice" pointcut-ref="pt1"/>
+    </aop:config>
+</beans>

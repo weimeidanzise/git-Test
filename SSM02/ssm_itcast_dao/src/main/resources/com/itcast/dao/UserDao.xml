@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itcast.dao.UserDao">
+    <!--遍历所有-->
+   <!-- <select id="findAll" resultType="user">
+        SELECT  * FROM user
+    </select>-->
+   <!-- <select id="findAll" resultType="user">
+        SELECT * from user
+    </select>-->
+    <select id="findAll" parameterType="pages" resultType="user">
+        SELECT  * FROM user
+        <if test="startNum!=null">
+            limit #{startNum},#{pageCounts}
+        </if>
+    </select>
+    <select id="findUser" resultType="user">
+        select * from user where username=#{username} and  pwd=#{pwd}
+    </select>
+
+    <!--登陆操作-->
+   <!-- <select id="findUser" parameterType="user" resultType="user">
+        SELECT  * FROM user WHERE username=#{username} and pwd=#{pwd}
+    </select>-->
+
+
+
+
+    <insert id="saveUser" parameterType="user">
+        INSERT INTO user(username,pwd,age,sex) values(#{username},#{pwd},#{age},#{sex})
+    </insert>
+    <update id="updateUser" parameterType="int" >
+        UPDATE  user set username = #{username},age=#{age} where id = #{id}
+    </update>
+    <delete id="deleteUser" parameterType="int">
+        DELETE from user where id=#{id}
+    </delete>
+    <!--遍历所有-->
+    <select id="findPages" parameterType="pages" resultType="user">
+        select * from user
+        <if test="startNum!=null">
+                limit #{startNum},#{PageCounts}
+        </if>
+    </select>
+</mapper>
